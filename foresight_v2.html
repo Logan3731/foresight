@@ -69,7 +69,7 @@
 (function(){
 'use strict';
 const W=620,H=1060;
-const COLS=6, ROWS=8, CELL=88, BX=(W-COLS*CELL)/2, BY=248;
+const COLS=6, ROWS=8, CELL=88, BX=(W-COLS*CELL)/2, BY=216;
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 const stage=document.getElementById('stage');
 const ovTitle=document.getElementById('ovTitle'), ovLevel=document.getElementById('ovLevel'), ovEnd=document.getElementById('ovEnd');
@@ -504,10 +504,11 @@ function cellFromPx(px,py){
 }
 
 /* 손가락으로도 전부 되도록 화면 버튼을 둔다 (키보드는 그대로 유지) */
+/* 폰에서는 화면에 맞춰 축소되므로 버튼을 넉넉히 잡는다 (88px → 축소돼도 손가락 크기 이상) */
 const UI={
-  undo:{x:46, y:1002, w:150, h:50},
-  end :{x:208, y:1002, w:366, h:50},
-  skip:{x:46, y:1002, w:528, h:50},
+  undo:{x:46, y:962, w:190, h:88},
+  end :{x:248, y:962, w:326, h:88},
+  skip:{x:46, y:962, w:528, h:88},
   cards:[{x:46,y:62,w:268,h:112},{x:326,y:62,w:268,h:112}]
 };
 const hit=(r,p)=>p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h;
@@ -806,10 +807,11 @@ function drawHUD(){
 }
 
 function drawLog(){
-  ctx.textAlign='center'; ctx.font='500 12px sans-serif';
-  S.log.forEach((t,i)=>{
-    ctx.fillStyle= i===S.log.length-1 ? '#93a0b5' : 'rgba(147,160,181,.40)';
-    ctx.fillText(t, W/2, 962+i*16);
+  ctx.textAlign='center'; ctx.font='500 13px sans-serif';
+  const last=S.log.slice(-2);
+  last.forEach((t,i)=>{
+    ctx.fillStyle= i===last.length-1 ? '#93a0b5' : 'rgba(147,160,181,.38)';
+    ctx.fillText(t, W/2, 934+i*17);
   });
   drawButtons();
 }
@@ -821,12 +823,12 @@ function button(r,label,key,on,accent){
   ctx.lineWidth=1.5; ctx.strokeRect(r.x,r.y,r.w,r.h);
   ctx.textAlign='center';
   ctx.fillStyle = on ? (accent?'#8fd0ff':'#93a0b5') : '#39424f';
-  ctx.font='800 17px sans-serif';
-  ctx.fillText(label, r.x+r.w/2, r.y+r.h/2+2);
+  ctx.font='800 23px sans-serif';
+  ctx.fillText(label, r.x+r.w/2, r.y+r.h/2+4);
   if(key){
-    ctx.font='500 11px sans-serif';
-    ctx.fillStyle = on ? 'rgba(147,160,181,.55)' : '#2c3441';
-    ctx.fillText(key, r.x+r.w/2, r.y+r.h-8);
+    ctx.font='500 12px sans-serif';
+    ctx.fillStyle = on ? 'rgba(147,160,181,.5)' : '#2c3441';
+    ctx.fillText(key, r.x+r.w/2, r.y+r.h-13);
   }
 }
 
