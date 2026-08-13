@@ -803,9 +803,10 @@ function draw(){
       ctx.beginPath(); ctx.moveTo(px+12,py+CELL-16); ctx.lineTo(px+CELL*0.42,py+CELL*0.5);
       ctx.lineTo(px+CELL*0.34,py+22); ctx.moveTo(px+CELL*0.42,py+CELL*0.5);
       ctx.lineTo(px+CELL-14,py+CELL*0.36); ctx.stroke();
+      // 예고 칸의 피해 숫자가 오른쪽 아래에 오므로, 균열 숫자는 왼쪽 아래에 둔다
       ctx.textAlign='center'; ctx.font='800 15px sans-serif';
       ctx.fillStyle='rgba(255,170,100,.9)';
-      ctx.fillText(left, px+CELL-16, py+CELL-12);
+      ctx.fillText(left, px+16, py+CELL-12);
     } else {
       ctx.fillStyle='#0c1017'; ctx.fillRect(px+2,py+2,CELL-4,CELL-4);
       ctx.strokeStyle='#161c28'; ctx.lineWidth=1; ctx.strokeRect(px+2,py+2,CELL-4,CELL-4);
@@ -1069,6 +1070,7 @@ window.__dev={
   end(){ return ovEnd.classList.contains('on'); },
   lvl(){ return ovLevel.classList.contains('on'); },
   endTurn, undoTurn, activate, moveRange, attackTargets, doAttack, KIND, tickAnim,
+  render(){ draw(); },
   // 연출을 기다리지 않고 턴을 끝까지 해결한다 (검증용)
   resolveTurn(){ endTurn(); if(S.anim) S.anim.skip=true;
     let g=0; while(S.anim&&S.anim.playing&&g++<600) tickAnim(1);
