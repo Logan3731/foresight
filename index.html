@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>예지 — v10</title>
+<title>예지 — v11</title>
 <style>
   /* 게임 판과 같은 어법: 상자 대신 표식, 데이터는 고정폭, 불씨는 오직 아직 오지 않은 것 */
   :root{
@@ -85,19 +85,21 @@
 
   <div class="overlay on" id="ovTitle">
     <h1>예지</h1>
-    <div class="tag">적의 다음 수가 전부 보인다</div>
+    <div class="tag">불이 다음에 어디로 갈지 보인다</div>
     <div class="rule"></div>
     <div class="brief">
-      <div class="lede">붉은 표식은 <b>이번 턴에 맞을 자리</b>입니다.<br>
-        죽이는 것만이 답은 아닙니다.</div>
-      <div class="row"><span class="k">밀기</span><span>공격을 <b>빗나가게</b> 하거나 <b>구덩이로</b> 떨어뜨린다</span></div>
-      <div class="row"><span class="k">거암</span><span>꿈쩍도 하지 않는다. 다른 답을 찾아야 한다</span></div>
-      <div class="row"><span class="k">분열체</span><span>때려죽이면 갈라진다. 구덩이는 예외</span></div>
-      <div class="row"><span class="k">균열</span><span>숫자가 0이 되면 무너진다. 위에 있으면 같이 떨어진다</span></div>
-      <div class="row"><span class="k">증원</span><span>점선 자리에 나타난다. 비켜 있지 않으면 다친다</span></div>
-      <div class="row"><span class="k">행동</span><span>한 턴에 <b>두 기만</b> 움직입니다. 셋 다는 못 씁니다</span></div>
-      <div class="row"><span class="k">되돌리기</span><span>이동만 됩니다. <b>공격은 확정</b></span></div>
-      <div class="row"><span class="k">층</span><span>12층. 층마다 <b>목표가 다릅니다</b> — 소탕 · 버티기 · 돌파 · 거수</span></div>
+      <div class="lede">당신은 현장 지휘관입니다.<br>
+        <b>창백한 표식은 다음 턴에 불이 닿을 자리</b>입니다.<br>
+        끄는 것만이 답은 아닙니다.</div>
+      <div class="row"><span class="k">관창</span><span>인접한 불을 <b>밀어냅니다.</b> 밀면 겨눈 방향이 어긋납니다</span></div>
+      <div class="row"><span class="k">붕괴구</span><span>무너진 바닥. 불을 밀어 넣으면 <b>그대로 꺼집니다</b></span></div>
+      <div class="row"><span class="k">불티</span><span>때리면 갈라져 번집니다. <b>붕괴구는 예외</b></span></div>
+      <div class="row"><span class="k">화점</span><span>꿈쩍도 하지 않습니다. 물로 깎아야 합니다</span></div>
+      <div class="row"><span class="k">균열</span><span>숫자가 0이 되면 바닥이 내려앉습니다. 위에 있으면 같이 떨어집니다</span></div>
+      <div class="row"><span class="k">번짐</span><span>점선 자리로 불이 옮겨붙습니다. 비켜 있지 않으면 다칩니다</span></div>
+      <div class="row"><span class="k">대원</span><span>한 턴에 <b>두 명만</b> 움직입니다. 셋 다는 못 씁니다</span></div>
+      <div class="row"><span class="k">되돌리기</span><span>이동만 됩니다. <b>방수는 확정</b></span></div>
+      <div class="row"><span class="k">층</span><span>12개 층. 층마다 <b>임무가 다릅니다</b> — 진화 · 저지 · 구조 · 백드래프트</span></div>
     </div>
     <button class="btn" id="btnStart">시작 <small>ENTER</small></button>
   </div>
@@ -129,13 +131,18 @@ const COLS=6, ROWS=8, CELL=88, BX=(W-COLS*CELL)/2, BY=186;
      뼈   = 내 유닛          재 = 적 유닛
      신호 = 지금 두면 적이 죽는 수. 판에서 가장 밝은 것은 항상 이것 하나 */
 const C={
-  ground:'#12100E', cell:'#1A1613', line:'#2A231D', tick:'#332A22',
-  void:'#000000',   voidEdge:'#2E2620',
-  ember:'#E4552B',  emberSoft:'rgba(228,85,43,.12)', emberLine:'rgba(228,85,43,.55)',
-  teal:'#6FD3CE',   tealSoft:'rgba(111,211,206,.10)',
-  bone:'#F2ECE0',   ash:'#8E6B54',  ashEdge:'#5C4232',
-  signal:'#FFFFFF',
-  text:'#C9C0B2',   dim:'#7A7266',   faint:'#4A443C'
+  ground:'#0F0D0C', cell:'#191413', line:'#2A211C', tick:'#352A22',
+  void:'#000000',   voidEdge:'#33281F',
+  /* 불 — 지금 타고 있는 것. 화면에서 유일하게 뜨겁다 */
+  ember:'#E4552B',  emberSoft:'rgba(228,85,43,.14)', emberLine:'rgba(228,85,43,.55)',
+  /* 예지 — 지휘관이 보는 앞일. 차갑고 얇다 */
+  frost:'#BFE6EF',  frostSoft:'rgba(191,230,239,.09)', frostLine:'rgba(191,230,239,.5)',
+  /* 물 — 우리 쪽 */
+  teal:'#58C6CC',   tealSoft:'rgba(88,198,204,.10)',
+  bone:'#DCEFF2',   ash:'#D2622A',  ashEdge:'#6E2A0E',
+  /* 지금 두면 꺼지는 수. 판에서 유일한 노랑 */
+  signal:'#FFD84A',
+  text:'#B9C6C9',   dim:'#6F7A7C',   faint:'#454E50'
 };
 const F_MONO='ui-monospace, SFMono-Regular, Menlo, monospace';
 const F_SANS='-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
@@ -167,11 +174,11 @@ function fit(){ const s=Math.min(innerWidth/W, innerHeight/H);
 addEventListener('resize',fit); fit();
 
 /* ================= 층 설계 ================= */
-/* # = 구덩이 (밀어 넣으면 즉사, 지나갈 수 없음)
-   X = 균열 (3턴 뒤 구덩이가 된다. 그 위에 서 있으면 같이 떨어진다) */
+/* # = 붕괴구 (밀어 넣으면 불이 꺼진다. 지나갈 수 없음)
+   X = 균열 (3턴 뒤 내려앉는다. 그 위에 서 있으면 같이 떨어진다) */
 const CRACK_TURNS=3;
 /* waves: [턴, 종류, x, y] — 그 턴이 끝날 때 등장. 자리는 한 턴 전부터 보인다
-   goal:  소탕=적 전멸 / 버티기=N턴 생존 / 돌파=아군 하나가 맨 윗줄 도달 / 보스=거수 처치
+   goal:  진화=불 전멸 / 저지=N턴 생존 / 구조=대원 하나가 맨 윗줄 도달 / 백드래프트 진압
           목표가 바뀌면 정답도 바뀐다. 버티기 층에서는 죽이는 것이 답이 아니다 */
 const P3=[[1,6],[2,6],[3,6]];
 const G={clear:{t:'clear'}, boss:{t:'boss'}, reach:{t:'reach'},
@@ -232,16 +239,16 @@ const FLOORS=[
 
 /* ================= 유닛 정의 ================= */
 const KIND={
-  push:{name:'밀개', side:'p', hp:3, move:4, atk:'push', dmg:1, rng:1},
-  pull:{name:'끌개', side:'p', hp:2, move:3, atk:'pull', dmg:1, rng:2},
-  shot:{name:'사수', side:'p', hp:2, move:2, atk:'line', dmg:2, rng:3},
-  rush :{name:'돌격체', side:'e', hp:4, move:3, atk:'melee', dmg:2, rng:1},
-  gun  :{name:'포격체', side:'e', hp:3, move:2, atk:'line',  dmg:1, rng:3},
-  boom :{name:'자폭체', side:'e', hp:2, move:4, atk:'boom',  dmg:3, rng:1},
-  rock :{name:'거암', side:'e', hp:6, move:2, atk:'melee', dmg:3, rng:1, fixed:true},
-  split:{name:'분열체', side:'e', hp:3, move:3, atk:'melee', dmg:1, rng:1, splits:true},
-  frag :{name:'조각', side:'e', hp:2, move:3, atk:'melee', dmg:1, rng:1},
-  boss :{name:'거수', side:'e', hp:16, move:1, atk:'charge', dmg:5, rng:3}
+  push:{name:'관창', side:'p', hp:3, move:4, atk:'push', dmg:1, rng:1},
+  pull:{name:'갈퀴', side:'p', hp:2, move:3, atk:'pull', dmg:1, rng:2},
+  shot:{name:'물대포', side:'p', hp:2, move:2, atk:'line', dmg:2, rng:3},
+  rush :{name:'불길', side:'e', hp:4, move:3, atk:'melee', dmg:2, rng:1},
+  gun  :{name:'복사열', side:'e', hp:3, move:2, atk:'line',  dmg:1, rng:3},
+  boom :{name:'가스', side:'e', hp:2, move:4, atk:'boom',  dmg:3, rng:1},
+  rock :{name:'화점', side:'e', hp:6, move:2, atk:'melee', dmg:3, rng:1, fixed:true},
+  split:{name:'불티', side:'e', hp:3, move:3, atk:'melee', dmg:1, rng:1, splits:true},
+  frag :{name:'불씨', side:'e', hp:2, move:3, atk:'melee', dmg:1, rng:1},
+  boss :{name:'백드래프트', side:'e', hp:16, move:1, atk:'charge', dmg:5, rng:3}
 };
 const PLAYER_KINDS=['push','pull','shot'];
 
@@ -277,7 +284,7 @@ function loadFloor(i){
   PLAYER_KINDS.forEach((k,n)=>{
     const pos=F.players[n], u=mkUnit(k,pos[0],pos[1]), old=prev[k];
     if(old){ u.maxhp=old.maxhp; u.hp=Math.min(u.maxhp, old.hp+heal); }
-    else { u.hp=1; pushLog(KIND[k].name+'이(가) 체력 1로 복귀했다'); }  // 영구 손실은 없다
+    else { u.hp=1; pushLog(J(KIND[k].name,'ga')+' 복귀했다 — 체력 1'); }  // 영구 손실은 없다
     S.units.push(u);
   });
 
@@ -371,7 +378,7 @@ function attackTargets(u){
 function shoveOutcome(u,t){
   const e=unitAt(t.x,t.y);
   if(!e || !(t.dx||t.dy)) return {};
-  if(KIND[e.kind].fixed) return {fixed:true};       // 거암은 움직이지 않는다
+  if(KIND[e.kind].fixed) return {fixed:true};       // 화점은 움직이지 않는다
   const steps = u.kind==='push' ? S.up.pushDist : 1;
   let x=e.x, y=e.y;
   for(let i=0;i<steps;i++){
@@ -410,9 +417,9 @@ function doAttack(u,t){
   afterResolve();
 }
 
-/* 밀기: 벽/유닛에 부딪히면 서로 1 피해, 구덩이면 즉사 */
+/* 밀기: 벽/유닛에 부딪히면 서로 1 피해, 붕괴구면 그대로 꺼진다 */
 function shove(e,dx,dy){
-  if(KIND[e.kind].fixed){                 // 거암은 밀리지도 당겨지지도 않는다
+  if(KIND[e.kind].fixed){                 // 화점은 밀리지도 당겨지지도 않는다
     pushLog(NM(e)+'은 꿈쩍도 하지 않는다');
     fx({type:'text', x:e.x, y:e.y, t:0.7, s:'꿈쩍 안 함'});
     return;
@@ -422,17 +429,17 @@ function shove(e,dx,dy){
   const o=unitAt(nx,ny);
   if(o){ damage(e,1); damage(o,1); pushLog(J(NM(e),'wa')+' '+J(NM(o),'ga')+' 부딪혔다'); return; }
   if(tile(nx,ny)==='pit'){
-    e.x=nx; e.y=ny;                                   // 구덩이 칸까지 밀려 들어간 뒤
-    dropIntoPit(e);                                   // 빨려 들어간다 (분열체도 여기선 갈라지지 않는다)
+    e.x=nx; e.y=ny;                                   // 붕괴구까지 밀려 들어간 뒤
+    dropIntoPit(e);                                   // 빨려 들어간다 (불티도 여기선 갈라지지 않는다)
     return;
   }
   e.x=nx; e.y=ny;
   if(e.side==='e') retarget(e);          // 밀리면 예고 칸이 따라 움직인다 → 빗나갈 수 있다
 }
 
-/* 구덩이 추락 — kill()을 거치지 않으므로 분열체가 갈라지지 않는다. 이게 분열체의 해답이다 */
+/* 붕괴구 추락 — kill()을 거치지 않으므로 불티가 갈라지지 않는다. 이게 불티의 해답이다 */
 function dropIntoPit(u){
-  pushLog(J(NM(u),'ga')+' 구덩이로 떨어졌다');
+  pushLog(J(NM(u),'ga')+' 붕괴구로 꺼졌다');
   fx({type:'fall', x:u.x, y:u.y, t:0.55, kind:u.kind});
   S.shake=Math.max(S.shake,0.3);
   S.units=S.units.filter(z=>z!==u);
@@ -441,7 +448,7 @@ function dropIntoPit(u){
     // 지형으로 처치하면 시간을 돌려받는다 — 턴 제한이 밀기·당기기를 벌하지 않도록
     S.parBonus++;
     fx({type:'text', x:u.x, y:u.y, t:0.9, s:'턴 +1'});
-    pushLog('지형으로 처치 — 권장 턴 +1');
+    pushLog('붕괴구로 꺼뜨렸다 — 골든타임 +1');
   }
 }
 const effPar=()=>S.par+S.parBonus;
@@ -462,7 +469,7 @@ function kill(u){
   if(KIND[u.kind].splits) splitInto(u);
 }
 
-/* 분열체는 죽으면 조각 둘로 갈라진다 (구덩이로 떨어뜨리면 갈라지지 않는다) */
+/* 불티는 때려서 끄면 둘로 갈라진다 (붕괴구로 떨어뜨리면 갈라지지 않는다) */
 function splitInto(u){
   const spots=DIRS.map(([dx,dy])=>({x:u.x+dx,y:u.y+dy}))
     .filter(c=>inB(c.x,c.y) && tile(c.x,c.y)!=='pit' && !unitAt(c.x,c.y));
@@ -494,7 +501,7 @@ function intentCells(e,dir){
 /* 적 계획: 이동 후 공격 방향 결정. 무작위 없음 — 같은 상황이면 항상 같은 수 */
 function plan(e,noMove){
   const K=KIND[e.kind];
-  if(K.atk==='charge'){                       // 거수는 모으는 동안 움직이지 않는다
+  if(K.atk==='charge'){                       // 백드래프트는 부푸는 동안 움직이지 않는다
     if(e.charge===undefined) e.charge=2;
     if(e.charge>0){ if(!e.intent) aimCharge(e); return; }
     aimCharge(e); e.charge=2; return;
@@ -623,10 +630,10 @@ function goalMet(){
 }
 function goalText(){
   const g=S.goal||{t:'clear'};
-  if(g.t==='hold')  return '버티기 '+Math.min(S.turn,g.n)+' / '+g.n+'턴';
-  if(g.t==='reach') return '맨 윗줄로 한 기 보내기';
-  if(g.t==='boss')  return '거수 처치';
-  return '적 전멸';
+  if(g.t==='hold')  return '저지 '+Math.min(S.turn,g.n)+' / '+g.n+'턴';
+  if(g.t==='reach') return '위층으로 대원 한 명 진입';
+  if(g.t==='boss')  return '백드래프트 진압';
+  return '진화';
 }
 
 /* 권장 턴을 넘기면 두 턴마다 하나씩 더 온다. 실패는 없지만 상황은 계속 나빠진다 */
@@ -639,7 +646,7 @@ function scheduleOvertime(){
   const kinds=['rush','split','rush','boom','rush','rock'];
   S.pending.push({turn:S.turn, kind:kinds[S.overCount%kinds.length], x:spot.x, y:spot.y, over:true});
   S.overCount++;
-  pushLog('권장 턴 초과 — 증원이 붙는다');
+  pushLog('골든타임 초과 — 불이 번진다');
 }
 
 function freeSpawnCell(){
@@ -688,7 +695,7 @@ function runStep(it){
     S.actor=e.id; retarget(e);
     const K=KIND[e.kind];
     if(K.atk==='charge'){
-      if(e.charge>1){ e.charge--; pushLog(NM(e)+'가 힘을 모은다 — '+e.charge+'턴 뒤'); return 0.3; }
+      if(e.charge>1){ e.charge--; pushLog(NM(e)+'가 부푼다 — '+e.charge+'턴 뒤'); return 0.3; }
       e.charge=0;
     }
     const victims=[];
@@ -749,7 +756,7 @@ function runStep(it){
       const e=mkUnit(w.kind,w.x,w.y);
       S.units.push(e); plan(e,true);
       fx({type:'ring', x:w.x, y:w.y, t:0.5, big:true});
-      pushLog(J(NM(e),'ga')+' 증원으로 나타났다');
+      pushLog(J(NM(e),'ga')+' 번져 붙었다');
     });
     S.shake=Math.max(S.shake,0.3);
     return 0.34;
@@ -791,14 +798,14 @@ function afterResolve(){
 
 /* ================= 강화 ================= */
 const UPS=[
-  {n:'긴 팔',   d:'밀개가 적을 2칸 민다',      f:()=>S.up.pushDist=2},
-  {n:'묵직함',  d:'밀개의 피해 +1',            f:()=>S.up.pushDmg+=1},
-  {n:'장총',    d:'사수의 사거리 +1',          f:()=>S.up.shotRng+=1},
-  {n:'긴 사슬', d:'끌개의 사거리 +1',          f:()=>S.up.pullRng+=1},
-  {n:'억센 손', d:'끌개의 피해 +1',            f:()=>S.up.pullDmg+=1},
-  {n:'철갑탄',  d:'사수의 피해 +1',            f:()=>S.up.shotDmg+=1},
-  {n:'경장비',  d:'두 유닛의 이동력 +1',       f:()=>S.up.move+=1},
-  {n:'보강',    d:'두 유닛의 체력 +1 (즉시 회복)', f:()=>{S.up.hpBonus+=1;
+  {n:'고압',   d:'관창이 불을 2칸 민다',      f:()=>S.up.pushDist=2},
+  {n:'직사',   d:'관창의 피해 +1',            f:()=>S.up.pushDmg+=1},
+  {n:'가압',    d:'물대포의 사거리 +1',          f:()=>S.up.shotRng+=1},
+  {n:'긴 갈퀴', d:'갈퀴의 사거리 +1',          f:()=>S.up.pullRng+=1},
+  {n:'억센 손', d:'갈퀴의 피해 +1',            f:()=>S.up.pullDmg+=1},
+  {n:'고압노즐', d:'물대포의 피해 +1',            f:()=>S.up.shotDmg+=1},
+  {n:'경장비',  d:'두 대원의 이동력 +1',       f:()=>S.up.move+=1},
+  {n:'방화복',  d:'두 대원의 체력 +1 (즉시 회복)', f:()=>{S.up.hpBonus+=1;
       S.units.filter(u=>u.side==='p').forEach(u=>{u.maxhp+=1;u.hp+=1;});}}
 ];
 
@@ -818,7 +825,7 @@ function showUpgrade(inPar){
   document.getElementById('lvTitle').textContent =
     (S.floor+1)+'층 돌파';
   document.getElementById('lvKicker').textContent =
-    (S.healNext ? '권장 턴 달성 — 체력 '+S.healNext+' 회복' : '하나를 고르세요 · 1 2 3');
+    (S.healNext ? '골든타임 달성 — 체력 '+S.healNext+' 회복' : '하나를 고르세요 · 1 2 3');
   const pool=UPS.slice(), pick=[];
   while(pick.length<3&&pool.length) pick.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
   const box=document.getElementById('lvCards'); box.innerHTML='';
@@ -839,14 +846,14 @@ function endRun(win){
   S.phase='end';
   if(!S.record.some(r=>r.floor===S.floor+1))       // 못 깬 층도 기록에 남긴다
     S.record.push({floor:S.floor+1, turns:S.turn, par:effPar(), inPar:false, failed:true});
-  document.getElementById('endTitle').textContent = win?'탑을 내려왔다':'전멸';
+  document.getElementById('endTitle').textContent = win?'불을 잡았다':'철수';
   const rows=S.record.map(r=>
     '<div><span>'+r.floor+'층</span><span><b>'+r.turns+'</b> / '+r.par+'턴 '+
     (r.failed?'<span class="no">실패</span>':(r.inPar?'<span class="ok">달성</span>':'<span>&nbsp;</span>'))+
     '</span></div>').join('');
   document.getElementById('endStat').innerHTML=
     '도달 <b>'+(S.floor+1)+'</b>/'+FLOORS.length+'층   처치 <b>'+S.totalKills+
-    '</b>   구덩이 <b>'+S.pitKills+'</b>'+
+    '</b>   붕괴구 <b>'+S.pitKills+'</b>'+
     '<div class="rec" style="margin-top:18px">'+rows+'</div>';
   ovEnd.classList.add('on');
 }
@@ -988,12 +995,12 @@ function draw(){
       bracket(px,py,6,13,C.voidEdge,2);
     } else if(t==='crack'){
       ctx.fillStyle=C.cell; ctx.fillRect(px,py,CELL,CELL);
-      ctx.strokeStyle=C.emberLine; ctx.lineWidth=1.5;      // 갈라진 금
+      ctx.strokeStyle=C.frostLine; ctx.lineWidth=1.5;     // 갈라진 금
       ctx.beginPath();
       ctx.moveTo(px+10,py+CELL-14); ctx.lineTo(px+CELL*0.44,py+CELL*0.52);
       ctx.lineTo(px+CELL*0.32,py+16); ctx.moveTo(px+CELL*0.44,py+CELL*0.52);
       ctx.lineTo(px+CELL-12,py+CELL*0.34); ctx.stroke();
-      ctx.textAlign='center'; ctx.font=mono(700,15); ctx.fillStyle=C.ember;
+      ctx.textAlign='center'; ctx.font=mono(700,15); ctx.fillStyle=C.frost;
       ctx.fillText(S.crackT[idx(x,y)], px+CELL/2, py+18);  // 남은 턴 — 위 가운데
     } else {
       ctx.fillStyle=C.cell; ctx.fillRect(px,py,CELL,CELL);
@@ -1014,7 +1021,7 @@ function draw(){
     if(!e.intent) return;
     const K=KIND[e.kind];
     const d=e.intent.dir, X0=cx(e.ax), Y0=cy(e.ay);
-    ctx.strokeStyle=C.emberLine; ctx.lineWidth=1.5;         // 궤적
+    ctx.strokeStyle=C.frostLine; ctx.lineWidth=1.5;        // 궤적
     ctx.setLineDash([5,5]);
     const far=e.intent.cells[e.intent.cells.length-1];
     if(far){ ctx.beginPath(); ctx.moveTo(X0+d.dx*CELL*0.3, Y0+d.dy*CELL*0.3);
@@ -1023,9 +1030,9 @@ function draw(){
     e.intent.cells.forEach(c=>{
       if(!inB(c.x,c.y)) return;
       const px=BX+c.x*CELL, py=BY+c.y*CELL;
-      ctx.fillStyle=C.emberSoft; ctx.fillRect(px,py,CELL,CELL);
-      bracket(px,py,7,15,C.ember,2.5);
-      ctx.textAlign='center'; ctx.font=mono(700,17); ctx.fillStyle=C.ember;
+      ctx.fillStyle=C.frostSoft; ctx.fillRect(px,py,CELL,CELL);
+      bracket(px,py,7,15,C.frost,2.5);
+      ctx.textAlign='center'; ctx.font=mono(700,17); ctx.fillStyle=C.frost;
       ctx.fillText('-'+K.dmg, px+CELL/2, py+CELL-10);      // 아래 가운데 — 모서리 표식을 피한다
     });
   });
@@ -1035,12 +1042,12 @@ function draw(){
     const px=BX+w.x*CELL, py=BY+w.y*CELL;
     const p=0.55+0.45*Math.sin(fxT/220);
     ctx.globalAlpha=p;
-    bracket(px,py,7,15,C.ember,2);
-    ctx.setLineDash([4,6]); ctx.strokeStyle=C.emberLine; ctx.lineWidth=1.5;
+    bracket(px,py,7,15,C.frost,2);
+    ctx.setLineDash([4,6]); ctx.strokeStyle=C.frostLine; ctx.lineWidth=1.5;
     ctx.strokeRect(px+7,py+7,CELL-14,CELL-14); ctx.setLineDash([]);
     ctx.globalAlpha=1;
-    ctx.textAlign='center'; ctx.font=sans(800,12); ctx.fillStyle=C.ember;
-    ctx.fillText('증원', px+CELL/2, py+CELL/2+4);
+    ctx.textAlign='center'; ctx.font=sans(800,12); ctx.fillStyle=C.frost;
+    ctx.fillText('번짐', px+CELL/2, py+CELL/2+4);
   });
 
   // 돌파 층 — 어디로 가야 하는지 판 위에 그린다
@@ -1088,7 +1095,7 @@ function draw(){
         ctx.stroke();
       }
       if(r.kill||r.danger||r.fixed)
-        label(r.kill?'즉사':r.danger?'위험':'안 밀림', px+CELL/2, py+19, col, 13);
+        label(r.kill?'꺼짐':r.danger?'위험':'안 밀림', px+CELL/2, py+19, col, 13);
     });
   }
 
@@ -1114,7 +1121,7 @@ function draw(){
   if(S.phase==='enemy'){
     ctx.textAlign='center';
     ctx.font=sans(800,14); ctx.fillStyle=C.ember;
-    ctx.fillText('적 턴', W/2-44, BY-15);
+    ctx.fillText('불의 차례', W/2-44, BY-15);
     ctx.font=mono(500,11); ctx.fillStyle=C.dim;
     ctx.fillText(S.anim.skip?'SKIPPING':'SPACE — 건너뛰기', W/2+46, BY-15);
   }
@@ -1173,7 +1180,7 @@ function drawUnit(u){
   const sel = S.sel===u, mine = u.side==='p';
   if(S.actor===u.id){                                  // 지금 움직이는 적
     const p=0.5+0.5*Math.sin(fxT/110);
-    ctx.strokeStyle=C.ember; ctx.globalAlpha=0.3+p*0.5; ctx.lineWidth=1.5;
+    ctx.strokeStyle=C.frost; ctx.globalAlpha=0.3+p*0.5; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.arc(X,Y,CELL*0.42,0,7); ctx.stroke(); ctx.globalAlpha=1;
   }
   // 지금 실재하는 것은 면으로 그린다 (예고는 선으로만 그려진다)
@@ -1227,7 +1234,7 @@ function drawUnit(u){
   // 체력 — 눈금으로
   const n=u.maxhp, gap=7, w=3, sx=X-(n*gap-2)/2, yy=Y+CELL*0.35;
   for(let i=0;i<n;i++){
-    ctx.fillStyle = i<u.hp ? (mine?C.teal:'#D8A98C') : 'rgba(255,255,255,.12)';
+    ctx.fillStyle = i<u.hp ? (mine?C.teal:'#FFB27A') : 'rgba(255,255,255,.12)';
     ctx.fillRect(sx+i*gap, yy, w, 5);
   }
 }
@@ -1245,7 +1252,7 @@ function drawHUD(){
   ctx.fillStyle = over ? C.ember : near ? C.bone : C.text;
   ctx.fillText(S.turn+' / '+eff, W-46, 40);
   ctx.font=mono(500,11); ctx.fillStyle= over?C.ember:C.faint;
-  ctx.fillText(over?'권장 턴 초과':'권장 턴', W-46, 56);
+  ctx.fillText(over?'골든타임 초과':'골든타임', W-46, 56);
   ctx.textAlign='left'; ctx.font=sans(700,12); ctx.fillStyle=C.teal;
   ctx.fillText(goalText(), 46, 56);
 
@@ -1279,7 +1286,7 @@ function drawHUD(){
 
   // 남은 적
   ctx.textAlign='right'; ctx.font=mono(500,11); ctx.fillStyle=C.dim;
-  ctx.fillText('적 '+alive('e').length+(realPending()?'  ·  증원 '+realPending():''), W-46, 120);
+  ctx.fillText('불 '+alive('e').length+(realPending()?'  ·  번짐 '+realPending():''), W-46, 120);
   ctx.font=mono(700,13); ctx.fillStyle= S.acts>0 ? C.teal : C.faint;
   ctx.fillText('행동 '+S.acts+' / 2', W-46, 138);
 
@@ -1292,13 +1299,13 @@ function drawHUD(){
     ctx.fillText(abilityText(S.sel)+'   ·   이동 '+(KIND[S.sel.kind].move+S.up.move), W/2, BY-16);
   } else {
     ctx.fillStyle=C.faint;
-    ctx.fillText('유닛을 눌러 고르세요', W/2, BY-16);
+    ctx.fillText('대원을 눌러 고르세요', W/2, BY-16);
   }
 }
 
 function abilityText(u){
-  if(u.kind==='push') return '인접한 적을 '+S.up.pushDist+'칸 밀고 '+S.up.pushDmg+' 피해';
-  if(u.kind==='pull') return S.up.pullRng+'칸 안의 대상을 1칸 당긴다 (적에겐 '+S.up.pullDmg+' 피해)';
+  if(u.kind==='push') return '인접한 불을 '+S.up.pushDist+'칸 밀고 '+S.up.pushDmg+' 피해';
+  if(u.kind==='pull') return S.up.pullRng+'칸 안의 대상을 1칸 당긴다 (불에는 '+S.up.pullDmg+' 피해)';
   return '직선 '+S.up.shotRng+'칸까지 '+S.up.shotDmg+' 피해';
 }
 
